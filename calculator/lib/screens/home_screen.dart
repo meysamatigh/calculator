@@ -1,5 +1,6 @@
+import 'package:math_expressions/math_expressions.dart';
+
 import '../constants/constants.dart';
-import '../widgets/button_neu.dart';
 import 'package:flutter/material.dart';
 import '../widgets/box_neu.dart';
 
@@ -11,6 +12,51 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // const HomeScreen({Key? key}) : super(key: key);
   bool darkMode = true;
+  String equation = '0';
+  String result = '0';
+  String expression = '';
+  double equationFontSize = 40;
+  double resultFontSize = 50;
+
+  btnPressed(String btnText) {
+    setState(() {
+      if (btnText == 'C') {
+        equationFontSize = 40;
+        resultFontSize = 50;
+        equation = '0';
+        result = '0';
+      } else if (btnText == '◄') {
+        equationFontSize = 50;
+        resultFontSize = 40;
+        equation = equation.substring(0, equation.length - 1);
+        if (equation.isEmpty) {
+          equation = '0';
+        }
+      } else if (btnText == '=') {
+        equationFontSize = 40;
+        resultFontSize = 50;
+        expression = equation;
+        // expression = expression.replaceAll('/', '/');
+        // expression = expression.replaceAll('*', '*');
+        try {
+          Parser p = Parser();
+          Expression exp = p.parse(expression);
+          ContextModel cm = ContextModel();
+          result = '${exp.evaluate(EvaluationType.REAL, cm)}';
+        } catch (e) {
+          result = 'What the hell???!!!';
+        }
+      } else {
+        equationFontSize = 50;
+        resultFontSize = 40;
+        if (equation == '0') {
+          equation = btnText;
+        } else {
+          equation = equation + btnText;
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,9 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          'meysam',
+                          result,
                           style: TextStyle(
-                            fontSize: 30,
+                            fontSize: resultFontSize,
                             fontWeight: FontWeight.bold,
                             color: darkMode ? Colors.white : Colors.red,
                           ),
@@ -82,12 +128,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           Text(
                             '=',
                             style: TextStyle(
-                              fontSize: 35,
+                              fontSize: equationFontSize,
                               color: darkMode ? Colors.green : Colors.grey,
                             ),
                           ),
                           Text(
-                            '22+58',
+                            equation,
                             style: TextStyle(
                                 fontSize: 35,
                                 color: darkMode ? Colors.green : Colors.grey),
@@ -218,6 +264,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget ButtonNeu(
+      {String? title, double padding = 17, Color? textColor, bool? darkMode}) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: BoxNeu(
+        darkMode: darkMode!,
+        borderRadius: BorderRadius.circular(40),
+        padding: const EdgeInsets.all(10),
+        child: InkWell(
+          onTap: () => btnPressed(title!),
+          child: SizedBox(
+            width: padding * 2,
+            height: padding * 2,
+            child: Center(
+              child: Text(
+                title!,
+                style: TextStyle(
+                    color:
+                        textColor ?? (darkMode ? Colors.white : Colors.black),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 40),
+              ),
+            ),
           ),
         ),
       ),
